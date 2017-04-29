@@ -21,9 +21,14 @@ public class Hopfield {
     private int dimension;
     private List<Double[]> patterns;
     private Double[][] W;
+    private List<Double[][]> Wi;
 
     public Double[][] getW() {
         return W;
+    }
+
+    public List<Double[][]> getWi() {
+        return Wi;
     }
 
     public int getDimension() {
@@ -55,10 +60,15 @@ public class Hopfield {
         
         Double[][] identity = Matrix.identity(dimension);
         
+        int i = 0;
         for(Double[] pattern : patterns){
-            Double[][] patternMatrix = Matrix.toMatrix(pattern);
-            W = Matrix.add(W, patternMatrix);
-            W = Matrix.subtract(W, identity);
+            
+            Double[][] auxW = Matrix.toMatrix(pattern);
+            auxW = Matrix.subtract(auxW, identity);
+            
+            W = Matrix.add(W, auxW);
+            //Save the aux Wi
+            Wi.add(auxW);
         }
     }
     
@@ -110,7 +120,7 @@ public class Hopfield {
             }
         }
         
-        return new Result(result, stack);
+        return new Result(result, stack, Wi);
     }
     
     /**
@@ -377,10 +387,12 @@ public class Hopfield {
     public static class Result{
         private final Double[] pattern;
         private final List<Double[]> history;
+        private final List<Double[][]> Wi;
 
-        public Result(Double[] pattern, List<Double[]> history) {
+        public Result(Double[] pattern, List<Double[]> history, List<Double[][]> Wi) {
             this.pattern = pattern;
             this.history = history;
+            this.Wi = Wi;
         }
 
         public Double[] getPattern() {
